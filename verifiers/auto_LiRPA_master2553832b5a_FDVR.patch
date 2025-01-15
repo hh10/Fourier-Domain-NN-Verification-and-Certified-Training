@@ -1,0 +1,216 @@
+diff --git a/.gitignore b/.gitignore
+old mode 100644
+new mode 100755
+diff --git a/__init__.py b/__init__.py
+old mode 100644
+new mode 100755
+diff --git a/backward_bound.py b/backward_bound.py
+old mode 100644
+new mode 100755
+diff --git a/beta_crown.py b/beta_crown.py
+old mode 100644
+new mode 100755
+diff --git a/bound_general.py b/bound_general.py
+old mode 100644
+new mode 100755
+diff --git a/bound_multi_gpu.py b/bound_multi_gpu.py
+old mode 100644
+new mode 100755
+diff --git a/bound_op_map.py b/bound_op_map.py
+old mode 100644
+new mode 100755
+diff --git a/bound_ops.py b/bound_ops.py
+old mode 100644
+new mode 100755
+diff --git a/bounded_tensor.py b/bounded_tensor.py
+old mode 100644
+new mode 100755
+diff --git a/cuda/cuda_kernels.cu b/cuda/cuda_kernels.cu
+old mode 100644
+new mode 100755
+diff --git a/cuda/cuda_utils.cpp b/cuda/cuda_utils.cpp
+old mode 100644
+new mode 100755
+diff --git a/cuda_utils.py b/cuda_utils.py
+old mode 100644
+new mode 100755
+diff --git a/edit_graph.py b/edit_graph.py
+old mode 100644
+new mode 100755
+diff --git a/eps_scheduler.py b/eps_scheduler.py
+old mode 100644
+new mode 100755
+diff --git a/forward_bound.py b/forward_bound.py
+old mode 100644
+new mode 100755
+diff --git a/interval_bound.py b/interval_bound.py
+old mode 100644
+new mode 100755
+diff --git a/jacobian.py b/jacobian.py
+old mode 100644
+new mode 100755
+diff --git a/linear_bound.py b/linear_bound.py
+old mode 100644
+new mode 100755
+diff --git a/operators/__init__.py b/operators/__init__.py
+old mode 100644
+new mode 100755
+diff --git a/operators/activation_base.py b/operators/activation_base.py
+old mode 100644
+new mode 100755
+diff --git a/operators/activations.py b/operators/activations.py
+old mode 100644
+new mode 100755
+diff --git a/operators/add_sub.py b/operators/add_sub.py
+old mode 100644
+new mode 100755
+diff --git a/operators/base.py b/operators/base.py
+old mode 100644
+new mode 100755
+diff --git a/operators/bivariate.py b/operators/bivariate.py
+old mode 100644
+new mode 100755
+index 5b79ada..c7c12d6
+--- a/operators/bivariate.py
++++ b/operators/bivariate.py
+@@ -247,9 +247,37 @@ class BoundMul(BoundOptimizableActivation):
+ 
+     def bound_forward(self, dim_in, x, y):
+         if self.is_linear_op:
+-            raise NotImplementedError
++            # raise NotImplementedError
++            if x.lw is None:
++                return self.bound_forward_one_perturbed(dim_in, y, x)
++            else:
++                return self.bound_forward_one_perturbed(dim_in, x, y)
+         return self.bound_forward_both_perturbed(dim_in, x, y)
+ 
++    def bound_forward_one_perturbed(self, dim_in, x, y):
++        x_lw, x_lb, x_uw, x_ub = x.lw, x.lb, x.uw, x.ub
++        y_lw, y_lb, y_uw, y_ub = None, y.lower, None, y.upper
++
++        (alpha_l, beta_l, gamma_l,
++         alpha_u, beta_u, gamma_u) = MulHelper.get_forward_relaxation(
++             x.lb, x.ub, y.lower, y.upper, self.opt_stage, getattr(self, 'alpha', None), self._start)
++
++        if x_lw is None: x_lw = 0
++        if y_lw is None: y_lw = 0
++        if x_uw is None: x_uw = 0
++        if y_uw is None: y_uw = 0
++
++        lw = alpha_l.unsqueeze(1).clamp(min=0) * x_lw + alpha_l.unsqueeze(1).clamp(max=0) * x_uw
++        lw = lw + beta_l.unsqueeze(1).clamp(min=0) * y_lw + beta_l.unsqueeze(1).clamp(max=0) * y_uw
++        lb = (alpha_l.clamp(min=0) * x_lb + alpha_l.clamp(max=0) * x_ub +
++             beta_l.clamp(min=0) * y_lb + beta_l.clamp(max=0) * y_ub + gamma_l)
++        uw = alpha_u.unsqueeze(1).clamp(max=0) * x_lw + alpha_u.unsqueeze(1).clamp(min=0) * x_uw
++        uw = uw + beta_u.unsqueeze(1).clamp(max=0) * y_lw + beta_u.unsqueeze(1).clamp(min=0) * y_uw
++        ub = (alpha_u.clamp(max=0) * x_lb + alpha_u.clamp(min=0) * x_ub +
++             beta_u.clamp(max=0) * y_lb + beta_u.clamp(min=0) * y_ub + gamma_u)
++
++        return LinearBound(lw, lb, uw, ub)
++
+     def bound_forward_both_perturbed(self, dim_in, x, y):
+         x_lw, x_lb, x_uw, x_ub = x.lw, x.lb, x.uw, x.ub
+         y_lw, y_lb, y_uw, y_ub = y.lw, y.lb, y.uw, y.ub
+diff --git a/operators/clampmult.py b/operators/clampmult.py
+old mode 100644
+new mode 100755
+diff --git a/operators/constant.py b/operators/constant.py
+old mode 100644
+new mode 100755
+diff --git a/operators/convolution.py b/operators/convolution.py
+old mode 100644
+new mode 100755
+diff --git a/operators/cut_ops.py b/operators/cut_ops.py
+old mode 100644
+new mode 100755
+diff --git a/operators/dropout.py b/operators/dropout.py
+old mode 100644
+new mode 100755
+diff --git a/operators/dtype.py b/operators/dtype.py
+old mode 100644
+new mode 100755
+diff --git a/operators/gradient_bounds.py b/operators/gradient_bounds.py
+old mode 100644
+new mode 100755
+diff --git a/operators/gradient_modules.py b/operators/gradient_modules.py
+old mode 100644
+new mode 100755
+diff --git a/operators/jacobian.py b/operators/jacobian.py
+old mode 100644
+new mode 100755
+diff --git a/operators/leaf.py b/operators/leaf.py
+old mode 100644
+new mode 100755
+diff --git a/operators/linear.py b/operators/linear.py
+old mode 100644
+new mode 100755
+diff --git a/operators/logical.py b/operators/logical.py
+old mode 100644
+new mode 100755
+diff --git a/operators/nonlinear.py b/operators/nonlinear.py
+old mode 100644
+new mode 100755
+diff --git a/operators/normalization.py b/operators/normalization.py
+old mode 100644
+new mode 100755
+diff --git a/operators/pooling.py b/operators/pooling.py
+old mode 100644
+new mode 100755
+diff --git a/operators/reduce.py b/operators/reduce.py
+old mode 100644
+new mode 100755
+diff --git a/operators/relu.py b/operators/relu.py
+old mode 100644
+new mode 100755
+diff --git a/operators/resize.py b/operators/resize.py
+old mode 100644
+new mode 100755
+diff --git a/operators/rnn.py b/operators/rnn.py
+old mode 100644
+new mode 100755
+diff --git a/operators/shape.py b/operators/shape.py
+old mode 100644
+new mode 100755
+diff --git a/operators/softmax.py b/operators/softmax.py
+old mode 100644
+new mode 100755
+diff --git a/operators/solver_utils.py b/operators/solver_utils.py
+old mode 100644
+new mode 100755
+diff --git a/operators/tanh.py b/operators/tanh.py
+old mode 100644
+new mode 100755
+diff --git a/operators/trigonometric.py b/operators/trigonometric.py
+old mode 100644
+new mode 100755
+diff --git a/opt_pruner.py b/opt_pruner.py
+old mode 100644
+new mode 100755
+diff --git a/optimize_graph.py b/optimize_graph.py
+old mode 100644
+new mode 100755
+diff --git a/optimized_bounds.py b/optimized_bounds.py
+old mode 100644
+new mode 100755
+diff --git a/output_constraints.py b/output_constraints.py
+old mode 100644
+new mode 100755
+diff --git a/parse_graph.py b/parse_graph.py
+old mode 100644
+new mode 100755
+diff --git a/patches.py b/patches.py
+old mode 100644
+new mode 100755
+diff --git a/perturbations.py b/perturbations.py
+old mode 100644
+new mode 100755
+diff --git a/solver_module.py b/solver_module.py
+old mode 100644
+new mode 100755
+diff --git a/utils.py b/utils.py
+old mode 100644
+new mode 100755
+diff --git a/wrapper.py b/wrapper.py
+old mode 100644
+new mode 100755
