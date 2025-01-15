@@ -25,16 +25,24 @@ The notebook to experiment with our specifications is [FD_auto_driving_aug_demo.
 All examples shown in Figure 2 and 3 in our work can be generated using this notebook. Short videos demonstrating samples of different specifications (created using the same notebook) are available at the links below.
 
 1. Additive and Multiplicative perturbations: [demo video link](https://drive.google.com/file/d/1-k8TmNKxVjH7GKl9h_PawAUPN_1nJYdv/view?usp=sharing),
+
+https://github.com/user-attachments/assets/b38b609a-f23b-440d-99cc-7c88776bbbc9
+
 2. Kernel-based spatial convolution produced perturbations: [demo video link](https://drive.google.com/file/d/16Srk9Ifnp3nXQzeckbmZT7lKjkO2602R/view?usp=sharing),
+
+https://github.com/user-attachments/assets/c76ae2e7-56b3-439d-98bb-537dafa19ee9
+
 3. Two-inputs conditional specifications: [demo video link](https://drive.google.com/file/d/1HA6rgcnDn2pvtdic-vyfswet0P67jumi/view?usp=sharing).
+
+https://github.com/user-attachments/assets/5153504e-2717-4437-8436-26278dca3b36
 
 ## Usage
 1. Run network (incomplete) verification: `python3 main.py --action eval --config <path-to-evals-config> --model_path <path-to-torch-model-file> --eps_linf <desired-pixel-space-linf-eps>`.
     On running incomplete verification, the augmented model in ONNX format gets saved in the network directory and vnnlibs for Fourier-perturbed inputs get saved in verifiers/vnnlibs for complete verification. Given the ONNX model and vnnlibs, do complete verification by:
-        1. Installing alpha-beta CROWN from https://github.com/Verified-Intelligence/alpha-beta-CROWN,
-        2. Create a CSV listing all the vnnlibs to be verified,
-        3. Then, edit and run: `python abcrown.py --config=configs/FDVR_complete_verification_example_spec.yaml`.
-2. Run network trainings: `python3 main.py --config <path-to-training-config> --eps_linf <desired-pixel-space-linf-eps> --epochs <num-training-epochs> <additional-args-as-needed-see-main.py>`.
-3. Run bound propgation comparison: `python3 -m augmentations/bounds_comparison.py`.
+   1. Installing alpha-beta CROWN from https://github.com/Verified-Intelligence/alpha-beta-CROWN,
+   2. Create a CSV listing all the vnnlibs to be verified,
+   3. Then, edit and run: `python abcrown.py --config=configs/FDVR_complete_verification_example_spec.yaml`.
+3. Run network trainings: `python3 main.py --config <path-to-training-config> --eps_linf <desired-pixel-space-linf-eps> --epochs <num-training-epochs> <additional-args-as-needed-see-main.py>`.
+4. Run bound propgation comparison: `python3 -m augmentations/bounds_comparison.py`.
 
-**Reproducibility instructions:** Most configs used in our work are in [configs](configs/). The trained models reported in experiments are shared [here](https://drive.google.com/drive/folders/1hPgZthwLh78jrsQToSiJiqPdoM2eT7tU?usp=drive_link) and have the config.json that was used to train them in their respective directories, and could be reproducibly (to the best of our efforts) retrained from scratch following Usage 2 for those configs. The results in Figure 3 and 4 are obtained by Usage 1 with eval config for [the single input (ball) specifications + CIFAR10 dataset](configs/CIFAR10/evals/evals.py) and [the two inputs (segment) specifications + CoDAN dataset](configs/CODAN/evals/evals.py). Usage 3 reproduces the bound widths, computation time and verified accuracy results in Table 1.
+**Reproducibility instructions:** Most configs used in our work are in [configs](configs/). The trained models reported in experiments are shared [here](https://drive.google.com/drive/folders/1hPgZthwLh78jrsQToSiJiqPdoM2eT7tU?usp=drive_link) and have the config.json that was used to train them in their respective directories, and could be reproducibly (to the best of our efforts) retrained from scratch following Usage 2 for those configs. The verified accuracies in Figure 5, 6 and Figure 9 (in Appendix D.2) are obtained by Usage 1 with eval config for [the single input (ball) specifications + CIFAR10 dataset](configs/CIFAR10/evals/evals.py) and [the two inputs (segment) specifications + CoDAN dataset](configs/CODAN/evals/evals.py). Usage 3 reproduces the bound widths, computation time and verified accuracy results in the tables i Figure 5.
