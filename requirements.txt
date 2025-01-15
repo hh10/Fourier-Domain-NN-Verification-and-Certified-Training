@@ -1,0 +1,11 @@
+torch
+torchvision
+onnx
+tensorboard
+torchmetrics
+tqdm
+numpy
+matplotlib
+scipy=1.12.0
+appdirs
+jupyter

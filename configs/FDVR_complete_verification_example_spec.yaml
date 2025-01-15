@@ -1,0 +1,23 @@
+# An example with a pytorch model and vnnlib specification.
+# python abcrown.py --config configs/FDVR_complete_verification_example_spec.yaml
+model:
+  onnx_path: results/configs_TRDS_pix_adv/2024-12-21_12-05-49/evaluations/fourier_adv_comp_2R_augmented.onnx  # Path to ONNX model.
+  input_shape: [ -1, 1, 165, 33 ]  # The vnnlib does not have input shape information, user should specify here.
+general:
+  root_path: verifiers/vnnlibs/vnnlibs_fourier_rob_comp_2R  # Root path of the csv file.
+  csv_name: vnnlibs_fourier_rob_comp_2R.csv
+solver:
+  bound_prop_method: forward+backward
+  batch_size: 100
+  beta-crown:
+    lr_beta: 0.01
+    iteration: 10  # Iterations for computing intermediate layer bounds.
+  start_save_best: -1
+  prune_after_crown: False
+bab:
+  timeout: 60
+  branching:
+    reduceop: max
+    candidates: 10
+attack:
+  pgd_order: middle

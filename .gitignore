@@ -1,0 +1,10 @@
+**/datasets/
+verifiers/
+__pycache__/
+.ipynb_checkpoints/
+results/
+**.ipynb
+**.png
+**.jpeg
+**.jpg
+scripts/
